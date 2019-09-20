@@ -9,6 +9,11 @@ type CMap struct {
 	l sync.RWMutex
 }
 
+type MapItem struct {
+	Key   string
+	Value interface{}
+}
+
 func NewCMap() *CMap {
 	return &CMap{v: make(map[string]interface{})}
 }
@@ -30,9 +35,21 @@ func (m *CMap) Get(key string) (value interface{}, exists bool) {
 	return
 }
 
-func (m *CMap) Has(key string) bool {
+func (m *CMap) Exist(key string) bool {
 	m.l.RLock()
 	defer m.l.RUnlock()
 	_, exists := m.v[key]
 	return exists
+}
+
+func (m *CMap) Dump() <-chan MapItem {
+	outChan := make(chan MapItem, m.Size())
+	for k, v := range m.v {
+		outChan <- MapItem{
+			Key:   k,
+			Value: v,
+		}
+	}
+	close(outChan)
+	return outChan
 }
