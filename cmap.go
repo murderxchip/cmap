@@ -8,6 +8,7 @@ type CMap struct {
 	v        map[string]interface{}
 	l        sync.RWMutex
 	afterSet CbAfterSet
+	afterGet CbAfterGet
 }
 
 type MapItem struct {
@@ -26,17 +27,23 @@ func (m *CMap) SetListenerSet(listener CbAfterSet) {
 	m.afterSet = listener
 }
 
+func (m *CMap) SetListenerGet(listener CbAfterGet) {
+	m.afterGet = listener
+}
+
 func (m *CMap) Size() int {
 	return len(m.v)
 }
 
-func (m *CMap) Set(key string, value interface{}) {
+func (m *CMap) Set(key string, value interface{}) error {
 	m.l.Lock()
 	defer m.l.Unlock()
 	m.v[key] = value
 	if m.afterSet != nil {
 		m.afterSet()
 	}
+
+	return nil
 }
 
 func (m *CMap) Get(key string) (value interface{}, exists bool) {
