@@ -5,8 +5,9 @@ import (
 )
 
 type CMap struct {
-	v map[string]interface{}
-	l sync.RWMutex
+	v        map[string]interface{}
+	l        sync.RWMutex
+	afterSet CbAfterSet
 }
 
 type MapItem struct {
@@ -14,8 +15,15 @@ type MapItem struct {
 	Value interface{}
 }
 
+type CbAfterSet func()
+type CbAfterGet func()
+
 func NewCMap() *CMap {
 	return &CMap{v: make(map[string]interface{})}
+}
+
+func (m *CMap) SetListenerSet(listener CbAfterSet) {
+	m.afterSet = listener
 }
 
 func (m *CMap) Size() int {
@@ -26,6 +34,9 @@ func (m *CMap) Set(key string, value interface{}) {
 	m.l.Lock()
 	defer m.l.Unlock()
 	m.v[key] = value
+	if m.afterSet != nil {
+		m.afterSet()
+	}
 }
 
 func (m *CMap) Get(key string) (value interface{}, exists bool) {
@@ -35,7 +46,7 @@ func (m *CMap) Get(key string) (value interface{}, exists bool) {
 	return
 }
 
-func (m *CMap) Exist(key string) bool {
+func (m *CMap) Exists(key string) bool {
 	m.l.RLock()
 	defer m.l.RUnlock()
 	_, exists := m.v[key]

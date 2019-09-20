@@ -28,6 +28,15 @@ func TestCMap_Size(t *testing.T) {
 	a.Equal(total, m.Size())
 }
 
+func SetListen() {
+	fmt.Println("current size:", m.Size())
+}
+
+func TestCMap_SetListenerSet(t *testing.T) {
+	m.SetListenerSet(SetListen)
+	m.Set("test", 1)
+}
+
 func TestCMap_Dump(t *testing.T) {
 	out := m.Dump()
 	for item := range out {
