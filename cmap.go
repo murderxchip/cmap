@@ -13,6 +13,10 @@ func NewCMap() *CMap {
 	return &CMap{v: make(map[string]interface{})}
 }
 
+func (m *CMap) Size() int {
+	return len(m.v)
+}
+
 func (m *CMap) Set(key string, value interface{}) {
 	m.l.Lock()
 	defer m.l.Unlock()
